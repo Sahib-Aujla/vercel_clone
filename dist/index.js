@@ -40,6 +40,7 @@ const cors_1 = __importDefault(require("cors"));
 const utils_1 = require("./utils");
 const simple_git_1 = __importDefault(require("simple-git"));
 const path = __importStar(require("path"));
+const aws_1 = require("./aws");
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
@@ -48,7 +49,9 @@ app.post("/deploy", (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     const id = (0, utils_1.genreateID)();
     yield (0, simple_git_1.default)().clone(repoUrl, path.join(__dirname, `output/${id}`));
     const filePaths = (0, utils_1.getAllFilePaths)(path.join(__dirname, `output/${id}`));
-    console.log(filePaths);
+    filePaths.forEach((file) => __awaiter(void 0, void 0, void 0, function* () {
+        yield (0, aws_1.uploadFile)(file.slice(__dirname.length + 1), file);
+    }));
     res.send({ id });
 }));
 app.listen(3000);

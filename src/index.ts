@@ -1,9 +1,9 @@
 import express from "express";
 import cors from "cors";
-import { genreateID,getAllFilePaths } from "./utils";
+import { genreateID, getAllFilePaths } from "./utils";
 import simpleGit from "simple-git";
 import * as path from "path";
-
+import { uploadFile } from "./aws";
 const app = express();
 
 app.use(cors());
@@ -16,8 +16,12 @@ app.post("/deploy", async (req, res) => {
 
   await simpleGit().clone(repoUrl, path.join(__dirname, `output/${id}`));
 
-  const filePaths=getAllFilePaths( path.join(__dirname, `output/${id}`));
-  console.log(filePaths);
+  const filePaths = getAllFilePaths(path.join(__dirname, `output/${id}`));
+
+  filePaths.forEach(async (file) => {
+    await uploadFile(file.slice(__dirname.length + 1), file);
+  });
+
   res.send({ id });
 });
 
